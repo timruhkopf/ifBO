@@ -209,9 +209,10 @@ class TransformerModel(nn.Module):
         if len(args) == 3:
             # case model(train_x, train_y, test_x, src_mask=None, style=None, only_return_standard_out=True)
             assert all(
-                kwarg in {"src_mask", "style", "only_return_standard_out"}
+                kwarg in {"src_mask", "style", "only_return_standard_out", 'src_key_padding_mask'}
                 for kwarg in kwargs.keys()
-            ), f"Unrecognized keyword argument in kwargs: {set(kwargs.keys()) - {'src_mask', 'style', 'only_return_standard_out'}}"
+            ), (f"Unrecognized keyword argument in kwargs:"
+                f" {set(kwargs.keys()) - {'src_mask', 'style', 'only_return_standard_out'}, 'src_key_padding_mask'}")
             x = args[0]
             if args[2] is not None:
                 x = torch.cat((x, args[2]), dim=0)
@@ -221,9 +222,11 @@ class TransformerModel(nn.Module):
             # case model((x,y), src_mask=None, single_eval_pos=None, only_return_standard_out=True)
             # case model((style,x,y), src_mask=None, single_eval_pos=None, only_return_standard_out=True)
             assert all(
-                kwarg in {"src_mask", "single_eval_pos", "only_return_standard_out"}
+                kwarg in {"src_mask", "single_eval_pos", "only_return_standard_out", 'src_key_padding_mask'}
                 for kwarg in kwargs.keys()
-            ), f"Unrecognized keyword argument in kwargs: {set(kwargs.keys()) - {'src_mask', 'single_eval_pos', 'only_return_standard_out'}}"
+            ), (f"Unrecognized keyword argument in kwa"
+                f"rg"
+                f"s: {set(kwargs.keys()) - {'src_mask', 'single_eval_pos', 'only_return_standard_out', 'src_key_padding_mask'}}")
             return self._forward(*args, **kwargs)
 
     def _forward(
@@ -231,6 +234,7 @@ class TransformerModel(nn.Module):
         src: tuple,
         src_mask: tuple | int | None = None,
         single_eval_pos: int | None = None,
+        src_key_padding_mask=None,
         only_return_standard_out: bool = True,
     ) -> dict[str, Tensor] | tuple[dict[str, Tensor], dict[str, Tensor]]:
         assert isinstance(
@@ -309,7 +313,7 @@ class TransformerModel(nn.Module):
         if self.pos_encoder is not None:
             src = self.pos_encoder(src)
 
-        output = self.transformer_encoder(src, src_mask)
+        output = self.transformer_encoder(src, src_mask, src_key_padding_mask)
 
         num_prefix_positions = len(style_src) + (
             self.global_att_embeddings.num_embeddings if self.global_att_embeddings else 0

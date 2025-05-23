@@ -151,7 +151,7 @@ class TransformerEncoderLayer(Module):
             src2 = torch.cat([global_tokens_src2, train_tokens_src2, eval_tokens_src2], dim=0)
 
         elif isinstance(src_mask, int):
-            assert src_key_padding_mask is None
+            # assert src_key_padding_mask is None
             single_eval_position = src_mask
             src_to_attend_to = src_[:single_eval_position]
             if self.save_trainingset_representations:
@@ -171,9 +171,11 @@ class TransformerEncoderLayer(Module):
                 src_[:single_eval_position],
                 src_[:single_eval_position],
                 src_[:single_eval_position],
+                key_padding_mask=src_key_padding_mask
             )[0]
             src_right = self.self_attn(
-                src_[single_eval_position:], src_to_attend_to, src_to_attend_to
+                src_[single_eval_position:], src_to_attend_to, src_to_attend_to,
+                key_padding_mask=src_key_padding_mask
             )[0]
             src2 = torch.cat([src_left, src_right], dim=0)
         else:
