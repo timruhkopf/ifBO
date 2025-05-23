@@ -140,8 +140,11 @@ class TransformerModel(nn.Module):
         """
         if len(args) == 3:
             # case model(train_x, train_y, test_x, src_mask=None, style=None, only_return_standard_out=True)
-            assert all(kwarg in {'src_mask', 'style', 'only_return_standard_out'} for kwarg in kwargs.keys()), \
-                f"Unrecognized keyword argument in kwargs: {set(kwargs.keys()) - {'src_mask', 'style', 'only_return_standard_out'}}"
+            assert all(kwarg in {'src_mask', 'style', 'only_return_standard_out',
+                                 'src_key_padding_mask'} for kwarg in
+                       kwargs.keys()), \
+                (f"Unrecognized keyword argument in kwargs: "
+                 f"{set(kwargs.keys()) - {'src_mask', 'style', 'only_return_standard_out', 'src_key_padding_mask'}}")
             x = args[0]
             if args[2] is not None:
                 x = torch.cat((x, args[2]), dim=0)
@@ -150,11 +153,16 @@ class TransformerModel(nn.Module):
         elif len(args) == 1 and isinstance(args, tuple):
             # case model((x,y), src_mask=None, single_eval_pos=None, only_return_standard_out=True)
             # case model((style,x,y), src_mask=None, single_eval_pos=None, only_return_standard_out=True)
-            assert all(kwarg in {'src_mask', 'single_eval_pos', 'only_return_standard_out'} for kwarg in kwargs.keys()), \
-                f"Unrecognized keyword argument in kwargs: {set(kwargs.keys()) - {'src_mask', 'single_eval_pos', 'only_return_standard_out'}}"
+            assert all(kwarg in {'src_mask', 'single_eval_pos', 'only_return_standard_out', 'src_key_padding_mask'
+                                 } for kwarg in kwargs.keys()), \
+                (f"Unrecognized keyword argument in kwargs: "
+                 f""
+                 f"{set(kwargs.keys()) - {'src_mask', 'single_eval_pos', 'only_return_standard_out', 'src_key_padding_mask'}}")
             return self._forward(*args, **kwargs)
 
-    def _forward(self, src, src_mask=None, single_eval_pos=None, only_return_standard_out=True):
+    def _forward(self, src, src_mask=None, single_eval_pos=None,
+                 src_key_padding_mask=None,
+    only_return_standard_out=True):
         assert isinstance(src, tuple), 'inputs (src) have to be given as (x,y) or (style,x,y) tuple'
 
         if len(src) == 2: # (x,y) and no style
@@ -212,7 +220,7 @@ class TransformerModel(nn.Module):
             src = self.pos_encoder(src)
 
 
-        output = self.transformer_encoder(src, src_mask)
+        output = self.transformer_encoder(src, src_mask, src_key_padding_mask)
 
         num_prefix_positions = len(style_src)+(self.global_att_embeddings.num_embeddings if self.global_att_embeddings else 0)
         if self.return_all_outputs:
