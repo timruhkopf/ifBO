@@ -34,7 +34,7 @@ def _post_evaluation_hook_function(
         loss_value_on_error=_loss_value_on_error,
         ignore_errors=_ignore_errors,
     ):
-        working_directory = Path(config_working_directory, "../../")
+        working_directory = Path(config_working_directory, "../../").resolve()
         loss = get_loss(result, loss_value_on_error, ignore_errors)
 
         # 1. Write all configs and losses
