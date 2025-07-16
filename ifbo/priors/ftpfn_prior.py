@@ -145,6 +145,37 @@ class MLP(torch.nn.Module):
             "identity": torch.nn.Identity(),
         }[activation]
 
+        self.signature = self.parameter_signature()
+
+    def parameter_signature(self) -> dict[str, Any]:
+        return {
+            "num_inputs": self.linears[0].weight.shape[1],
+            "num_outputs": self.linears[-1].weight.shape[0],
+            "num_layers": len(self.linears),
+            "num_hidden": self.linears[0].weight.shape[0],
+            "init_std": self.init_std,
+            "sparseness": self.sparseness,
+            "preactivation_noise_std": self.preactivation_noise_std,
+            "output_noise": self.output_noise,
+        }
+
+    def reset_from_signature(self, signature: dict[str, Any]) -> None:
+        num_layers = signature.get("num_layers", 8)
+        num_hidden = signature.get("num_hidden", 64)
+        num_inputs = signature.get("num_inputs", 2)
+        num_outputs = signature.get("num_outputs", 1)
+        self.init_std = signature.get("init_std", 0.1)
+        self.sparseness = signature.get("sparseness", 0.1)
+        self.preactivation_noise_std = signature.get("preactivation_noise_std", 0.001)
+        self.output_noise = signature.get("output_noise", 0.001)
+
+        self.linears = torch.nn.ModuleList(
+            [torch.nn.Linear(num_inputs, num_hidden)]
+            + [torch.nn.Linear(num_hidden, num_hidden) for _ in range(num_layers - 2)]
+            + [torch.nn.Linear(num_hidden, num_outputs)]
+        )
+        self.reset_parameters()
+
     def reset_parameters(
         self, init_std: float | None = None, sparseness: float | None = None
     ) -> None:
