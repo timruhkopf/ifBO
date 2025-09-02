@@ -17,7 +17,7 @@ import pandas as pd
 from joblib import delayed, Parallel
 from typing_extensions import Literal, List
 
-from pfns_hpo.utils.plotting_utils import (
+from ifBO_icml2024.src.pfns_hpo.pfns_hpo.utils.plotting_utils import (
     calc_bounds_per_benchmark,
     get_aggregated_plot,
     get_rank_plot,
@@ -516,7 +516,7 @@ def get_per_benchmark_plot_style(
         fig.supxlabel("Only overhead time (in s)")
     else: 
         fig.supxlabel("Total epochs spent")
-    plt.tight_layout()
+    # plt.tight_layout()
 
     target = output_path / f"{filename}.png"
     plt.savefig(target)

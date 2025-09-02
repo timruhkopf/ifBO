@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 from typing_extensions import Literal
 
-from .plot_styles import (
+from ifBO_icml2024.src.pfns_hpo.pfns_hpo.plot_styles import (
     ALGORITHMS,
     BENCH_TABLE_NAMES,
     BENCHMARK_COLORS,
@@ -26,7 +26,7 @@ from .plot_styles import (
     Y_LIMITS,
     get_xticks,
 )
-from .plotting_types import ExperimentResults, all_possibilities, fetch_results
+from ifBO_icml2024.src.pfns_hpo.pfns_hpo.plotting_types import ExperimentResults, all_possibilities, fetch_results
 
 HERE = Path(__file__).parent.absolute()
 DEFAULT_BASE_PATH = HERE.parent.parent
