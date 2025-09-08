@@ -105,7 +105,9 @@ def calculate_continuations(
     # subtracts the previous fidelity value from the current value
     _df.loc[:, "fidelity_diff"] = _df.groupby("Config_id_base")[_column].diff()
     # fills only the values for the first fidelity which will be NaNs from the `.diff()`
-    _df["fidelity_diff"].fillna(_df[_column], inplace=True)
+    # _df["fidelity_diff"].fillna(_df[_column], inplace=True)
+    _df["fidelity_diff"] = _df["fidelity_diff"].fillna(_df[_column])
+
     _df[_column] = _df["fidelity_diff"]
     _df.drop(columns=["fidelity_diff", "Config_id_base"], inplace=True)
     return _df
